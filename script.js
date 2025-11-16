@@ -7,7 +7,7 @@ slider.addEventListener('mousedown', (e) => {
   isDown = true;
   slider.classList.add('active');
 
-  startX = e.clientX;
+  startX = e.pageX;  // Cypress uses pageX
   scrollLeft = slider.scrollLeft;
 });
 
@@ -26,8 +26,8 @@ slider.addEventListener('mousemove', (e) => {
 
   e.preventDefault();
 
-  const x = e.clientX;
-  const walk = (x - startX);   // drag distance
+  const x = e.pageX; // IMPORTANT for Cypress
+  const walk = x - startX; // distance dragged
 
-  slider.scrollLeft = scrollLeft - walk;
+  slider.scrollLeft = scrollLeft - walk; // update scroll
 });
