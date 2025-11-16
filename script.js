@@ -1,33 +1,46 @@
-const slider = document.querySelector('.items');
-let isDown = false;
-let startX;
-let scrollLeft;
+const container = document.querySelector(".container");
+const cubes = document.querySelectorAll(".cube");
 
-slider.addEventListener('mousedown', (e) => {
-  isDown = true;
-  slider.classList.add('active');
+let selectedCube = null;
+let offsetX = 0;
+let offsetY = 0;
 
-  startX = e.pageX;  // Cypress uses pageX
-  scrollLeft = slider.scrollLeft;
+cubes.forEach(cube => {
+  cube.addEventListener("mousedown", dragStart);
 });
 
-slider.addEventListener('mouseleave', () => {
-  isDown = false;
-  slider.classList.remove('active');
-});
+function dragStart(e) {
+  selectedCube = e.target;
 
-slider.addEventListener('mouseup', () => {
-  isDown = false;
-  slider.classList.remove('active');
-});
+  const rect = selectedCube.getBoundingClientRect();
 
-slider.addEventListener('mousemove', (e) => {
-  if (!isDown) return;
+  // Calculate offset so cube follows mouse naturally
+  offsetX = e.clientX - rect.left;
+  offsetY = e.clientY - rect.top;
 
-  e.preventDefault();
+  document.addEventListener("mousemove", dragging);
+  document.addEventListener("mouseup", dragEnd);
+}
 
-  const x = e.pageX; // IMPORTANT for Cypress
-  const walk = x - startX; // distance dragged
+function dragging(e) {
+  if (!selectedCube) return;
 
-  slider.scrollLeft = scrollLeft - walk; // update scroll
-});
+  const containerRect = container.getBoundingClientRect();
+  const cubeRect = selectedCube.getBoundingClientRect();
+
+  let newLeft = e.clientX - containerRect.left - offsetX;
+  let newTop = e.clientY - containerRect.top - offsetY;
+
+  // Boundary conditions
+  newLeft = Math.max(0, Math.min(newLeft, containerRect.width - cubeRect.width));
+  newTop = Math.max(0, Math.min(newTop, containerRect.height - cubeRect.height));
+
+  selectedCube.style.left = newLeft + "px";
+  selectedCube.style.top = newTop + "px";
+}
+
+function dragEnd() {
+  selectedCube = null;
+  document.removeEventListener("mousemove", dragging);
+  document.removeEventListener("mouseup", dragEnd);
+}
